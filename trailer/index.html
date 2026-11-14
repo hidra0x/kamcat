@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>KamCat — Trailer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    overflow: hidden;
+    color: #fff;
+  }
+  #stage {
+    width: 1920px; height: 1080px;
+    position: relative;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 100%);
+    overflow: hidden;
+  }
+
+  /* Частицы */
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: #f5c518;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 10px #f5c518;
+    animation: float 8s infinite;
+  }
+  @keyframes float {
+    0% { opacity: 0; transform: translateY(0) scale(0.5); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-300px) scale(1.5); }
+  }
+
+  /* Сцены */
+  .scene {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+    padding: 60px;
+  }
+  .scene.active { opacity: 1; }
+
+  /* Логотип */
+  #logo-img {
+    width: 350px; height: 350px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 100px rgba(245, 197, 24, 0.7),
+                0 0 200px rgba(245, 197, 24, 0.4);
+    opacity: 0;
+    transform: scale(0.3) rotate(-20deg);
+    transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #logo-img.show { opacity: 1; transform: scale(1) rotate(0); }
+
+  #logo-text {
+    font-size: 130px;
+    font-weight: 900;
+    letter-spacing: 15px;
+    margin-top: 40px;
+    text-shadow: 0 0 50px rgba(245, 197, 24, 0.8);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease;
+  }
+  #logo-text.show { opacity: 1; transform: translateY(0); }
+  #logo-text .cat { color: #f5c518; }
+
+  #subtitle {
+    font-size: 36px;
+    letter-spacing: 10px;
+    color: #ccc;
+    margin-top: 20px;
+    font-weight: 300;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  #subtitle.show { opacity: 1; }
+
+  /* Заголовки сцен */
+  .scene-title {
+    font-size: 42px;
+    letter-spacing: 8px;
+    color: #f5c518;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 1s ease;
+  }
+  .scene-title.show { opacity: 1; transform: translateY(0); }
+
+  /* Изображения */
+  .scene-img {
+    max-width: 900px; max-height: 600px;
+    border-radius: 16px;
+    box-shadow: 0 30px 100px rgba(0,0,0,0.9),
+                0 0 80px rgba(245, 197, 24, 0.2);
+    opacity: 0;
+    transform: scale(0.85) translateY(30px);
+    transition: all 1.5s ease;
+  }
+  .scene-img.show { opacity: 1; transform: scale(1) translateY(0); }
+
+  /* Результат */
+  .result {
+    margin-top: 30px;
+    font-size: 60px;
+    font-weight: 800;
+    color: #4ade80;
+    text-shadow: 0 0 40px rgba(74, 222, 128, 0.8);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .result.show { opacity: 1; transform: scale(1); }
+
+  /* Киберпанк-кот */
+  #cybercat-img {
+    max-width: 1000px; max-height: 700px;
+    border-radius: 20px;
+    box-shadow: 0 0 100px rgba(236, 72, 153, 0.6),
+                0 0 200px rgba(59, 130, 246, 0.4);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 2s ease;
+  }
+  #cybercat-img.show { opacity: 1; transform: scale(1); }
+
+  /* Текстовая генерация */
+  #typing-text {
+    font-size: 40px;
+    color: #fff;
+    max-width: 1400px;
+    text-align: center;
+    line-height: 1.6;
+    font-family: 'Consolas', monospace;
+    border-right: 3px solid #f5c518;
+    padding: 20px 40px;
+    min-height: 200px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #typing-text.show { opacity: 1; }
+  #typing-text .cursor {
+    animation: blink 0.7s infinite;
+    color: #f5c518;
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Цифры */
+  .stats {
+    display: flex; gap: 100px;
+    align-items: center; justify-content: center;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stat.show { opacity: 1; transform: translateY(0) scale(1); }
+  .stat .num {
+    font-size: 120px;
+    font-weight: 900;
+    color: #f5c518;
+    text-shadow: 0 0 50px rgba(245,197,24,0.6);
+    line-height: 1;
+  }
+  .stat .label {
+    font-size: 24px;
+    letter-spacing: 4px;
+    color: #aaa;
+    margin-top: 15px;
+    text-transform: uppercase;
+  }
+
+  /* Финал */
+  #final-img {
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 100px rgba(245, 197, 24, 0.9);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #final-img.show { opacity: 1; transform: scale(1); }
+
+  #final-text {
+    font-size: 120px;
+    font-weight: 900;
+    letter-spacing: 12px;
+    margin-top: 30px;
+    text-shadow: 0 0 60px rgba(245, 197, 24, 0.7);
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+  #final-text.show { opacity: 1; }
+  #final-text .cat { color: #f5c518; }
+
+  #final-slogan {
+    font-size: 34px;
+    letter-spacing: 8px;
+    color: #f5c518;
+    margin-top: 25px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1.2s ease;
+  }
+  #final-slogan.show { opacity: 1; transform: translateY(0); }
+
+  #credits {
+    font-size: 24px;
+    letter-spacing: 6px;
+    color: #666;
+    margin-top: 40px;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+  #credits.show { opacity: 1; }
+
+  /* Кнопка записи */
+  #record-btn {
+    position: fixed; bottom: 20px; right: 20px;
+    padding: 14px 24px; border-radius: 10px;
+    background: #f5c518; color: #000;
+    font-weight: 700; font-size: 16px;
+    border: none; cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 5px 20px rgba(245,197,24,0.5);
+    transition: all 0.3s ease;
+  }
+  #record-btn:hover { transform: scale(1.05); }
+  #record-btn.recording { background: #e11d48; color: #fff; }
+
+  /* Индикатор прогресса */
+  #progress-bar {
+    position: absolute; bottom: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f5c518, #ec4899, #3b82f6);
+    width: 0%;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 20px rgba(245, 197, 24, 0.8);
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <!-- Частицы -->
+  <div class="particle" style="left:10%; top:80%; animation-delay:0s"></div>
+  <div class="particle" style="left:20%; top:70%; animation-delay:0.5s"></div>
+  <div class="particle" style="left:30%; top:90%; animation-delay:1s"></div>
+  <div class="particle" style="left:45%; top:85%; animation-delay:1.5s"></div>
+  <div class="particle" style="left:60%; top:75%; animation-delay:2s"></div>
+  <div class="particle" style="left:75%; top:88%; animation-delay:2.5s"></div>
+  <div class="particle" style="left:85%; top:72%; animation-delay:3s"></div>
+  <div class="particle" style="left:55%; top:60%; animation-delay:3.5s"></div>
+
+  <!-- Индикатор прогресса -->
+  <div id="progress-bar"></div>
+
+  <!-- Сцена 1: Логотип -->
+  <div class="scene" id="scene1">
+    <img id="logo-img" src="logo.png" alt="KamCat">
+    <div id="logo-text"><span class="cat">Kam</span>Cat</div>
+    <div id="subtitle">AI that knows: cat or dog?</div>
+  </div>
+
+  <!-- Сцена 2: Классификатор -->
+  <div class="scene" id="scene2">
+    <div class="scene-title" id="title2">CLASSIFICATION</div>
+    <img id="classify-img" class="scene-img" src="cat.jpg" alt="cat">
+    <div id="classify-result" class="result">🐱 Cat — 99.7%</div>
+  </div>
+
+  <!-- Сцена 3: YOLO -->
+  <div class="scene" id="scene3">
+    <div class="scene-title" id="title3">DETECTION</div>
+    <img id="detect-img" class="scene-img" src="cat_detected.jpg" alt="detection" onerror="this.src='cat.jpg'">
+    <div id="detect-result" class="result">🎯 1 object found</div>
+  </div>
+
+  <!-- Сцена 4: Генерация картинок -->
+  <div class="scene" id="scene4">
+    <div class="scene-title" id="title4">IMAGE GENERATION</div>
+    <img id="cybercat-img" src="cybercat.png" alt="cyberpunk cat">
+    <div id="gen-caption" class="result" style="color: #ec4899; font-size: 42px;">Stable Diffusion 1.5</div>
+  </div>
+
+  <!-- Сцена 5: Генерация текста -->
+  <div class="scene" id="scene5">
+    <div class="scene-title" id="title5">TEXT GENERATION</div>
+    <div id="typing-text">
+      <span id="typing-content"></span><span class="cursor">▊</span>
+    </div>
+    <div id="text-caption" class="result" style="color: #4ade80; font-size: 32px;">KamCat-Micro • loss 1.58</div>
+  </div>
+
+  <!-- Сцена 6: Цифры -->
+  <div class="scene" id="scene6">
+    <div class="stats">
+      <div class="stat" id="stat1"><div class="num">97.5%</div><div class="label">Accuracy</div></div>
+      <div class="stat" id="stat2"><div class="num">25K</div><div class="label">Images</div></div>
+      <div class="stat" id="stat3"><div class="num">4</div><div class="label">Models</div></div>
+      <div class="stat" id="stat4"><div class="num">1.58</div><div class="label">Text Loss</div></div>
+    </div>
+  </div>
+
+  <!-- Сцена 7: Benchmark (если есть) -->
+  <div class="scene" id="scene7">
+    <div class="scene-title" id="title7">BENCHMARK</div>
+    <img id="bench-img" class="scene-img" src="benchmark.png" alt="benchmark" onerror="document.getElementById('scene7').style.display='none'">
+  </div>
+
+  <!-- Сцена 8: Финал -->
+  <div class="scene" id="scene8">
+    <img id="final-img" src="logo.png" alt="KamCat">
+    <div id="final-text"><span class="cat">Kam</span>Cat</div>
+    <div id="final-slogan">🚀 Скоро мы будем наверху</div>
+    <div id="credits">by Артём • v1.0 • 2026</div>
+  </div>
+</div>
+
+<button id="record-btn">● Начать запись</button>
+
+<script>
+  // Масштабирование
+  function fitStage() {
+    const stage = document.getElementById('stage');
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    stage.style.transform = `scale(${s})`;
+    stage.style.transformOrigin = 'top left';
+    stage.style.position = 'absolute';
+    stage.style.left = '50%';
+    stage.style.top = '50%';
+    stage.style.marginLeft = `-${(1920 * s) / 2}px`;
+    stage.style.marginTop = `-${(1080 * s) / 2}px`;
+  }
+  fitStage();
+  window.addEventListener('resize', fitStage);
+
+  // Таймлайн
+  const TOTAL_DURATION = 60000; // 60 секунд
+  const timeline = [
+    // Сцена 1: Логотип (0-6)
+    { t: 0,     fn: () => show('scene1') },
+    { t: 200,   fn: () => document.getElementById('logo-img').classList.add('show') },
+    { t: 1200,  fn: () => document.getElementById('logo-text').classList.add('show') },
+    { t: 2200,  fn: () => document.getElementById('subtitle').classList.add('show') },
+    { t: 6000,  fn: () => hide('scene1') },
+
+    // Сцена 2: Классификатор (6-13)
+    { t: 6500,  fn: () => show('scene2') },
+    { t: 6700,  fn: () => document.getElementById('title2').classList.add('show') },
+    { t: 7000,  fn: () => document.getElementById('classify-img').classList.add('show') },
+    { t: 9000,  fn: () => document.getElementById('classify-result').classList.add('show') },
+    { t: 13000, fn: () => hide('scene2') },
+
+    // Сцена 3: YOLO (13-20)
+    { t: 13500, fn: () => show('scene3') },
+    { t: 13700, fn: () => document.getElementById('title3').classList.add('show') },
+    { t: 14000, fn: () => document.getElementById('detect-img').classList.add('show') },
+    { t: 16000, fn: () => document.getElementById('detect-result').classList.add('show') },
+    { t: 20000, fn: () => hide('scene3') },
+
+    // Сцена 4: Генерация картинок (20-27)
+    { t: 20500, fn: () => show('scene4') },
+    { t: 20700, fn: () => document.getElementById('title4').classList.add('show') },
+    { t: 21000, fn: () => document.getElementById('cybercat-img').classList.add('show') },
+    { t: 23000, fn: () => document.getElementById('gen-caption').classList.add('show') },
+    { t: 27000, fn: () => hide('scene4') },
+
+    // Сцена 5: Генерация текста (27-34)
+    { t: 27500, fn: () => show('scene5') },
+    { t: 27700, fn: () => document.getElementById('title5').classList.add('show') },
+    { t: 28000, fn: () => {
+        document.getElementById('typing-text').classList.add('show');
+        startTyping("KamCat — это шаг в мир искусственного интеллекта. Нейросеть — это математика, а не магия.");
+      }
+    },
+    { t: 32000, fn: () => document.getElementById('text-caption').classList.add('show') },
+    { t: 34000, fn: () => hide('scene5') },
+
+    // Сцена 6: Цифры (34-42)
+    { t: 34500, fn: () => show('scene6') },
+    { t: 35000, fn: () => document.getElementById('stat1').classList.add('show') },
+    { t: 35800, fn: () => document.getElementById('stat2').classList.add('show') },
+    { t: 36600, fn: () => document.getElementById('stat3').classList.add('show') },
+    { t: 37400, fn: () => document.getElementById('stat4').classList.add('show') },
+    { t: 42000, fn: () => hide('scene6') },
+
+    // Сцена 7: Benchmark (42-50)
+    { t: 42500, fn: () => show('scene7') },
+    { t: 42700, fn: () => document.getElementById('title7').classList.add('show') },
+    { t: 43000, fn: () => document.getElementById('bench-img').classList.add('show') },
+    { t: 50000, fn: () => hide('scene7') },
+
+    // Сцена 8: Финал (50-60)
+    { t: 50500, fn: () => show('scene8') },
+    { t: 50800, fn: () => document.getElementById('final-img').classList.add('show') },
+    { t: 52000, fn: () => document.getElementById('final-text').classList.add('show') },
+    { t: 53500, fn: () => document.getElementById('final-slogan').classList.add('show') },
+    { t: 55000, fn: () => document.getElementById('credits').classList.add('show') },
+    { t: 59000, fn: () => hide('scene8') },
+  ];
+
+  function show(id) { document.getElementById(id).classList.add('active'); }
+  function hide(id) { document.getElementById(id).classList.remove('active'); }
+
+  let timers = [];
+  let progressTimer = null;
+  let typingTimer = null;
+
+  function startTyping(text) {
+    const el = document.getElementById('typing-content');
+    el.textContent = '';
+    let i = 0;
+    typingTimer = setInterval(() => {
+      if (i < text.length) {
+        el.textContent += text[i];
+        i++;
+      } else {
+        clearInterval(typingTimer);
+      }
+    }, 40);
+  }
+
+  function playTrailer() {
+    // Сброс
+    timers.forEach(clearTimeout);
+    clearInterval(progressTimer);
+    clearInterval(typingTimer);
+    timers = [];
+    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.show').forEach(e => e.classList.remove('show'));
+    document.getElementById('typing-content').textContent = '';
+    document.getElementById('progress-bar').style.width = '0%';
+
+    // Запуск
+    const startTime = Date.now();
+    timeline.forEach(ev => timers.push(setTimeout(ev.fn, ev.t)));
+
+    // Прогресс-бар
+    progressTimer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, (elapsed / TOTAL_DURATION) * 100);
+      document.getElementById('progress-bar').style.width = pct + '%';
+      if (pct >= 100) clearInterval(progressTimer);
+    }, 100);
+  }
+
+  // Запись
+  let recorder = null, recordedChunks = [];
+
+  document.getElementById('record-btn').addEventListener('click', async (e) => {
+    const btn = e.target;
+    if (recorder && recorder.state === 'recording') { recorder.stop(); return; }
+
+    alert("Запись через браузер:\n\n1. Нажми OK\n2. Выбери ЭТУ вкладку\n3. Трейлер начнётся сам (60 сек)\n4. Файл kamcat_trailer.webm сохранится в Загрузки");
+
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: 30, width: 1920, height: 1080 }, audio: false,
+      });
+      recordedChunks = [];
+      recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+      recorder.ondataavailable = (ev) => { if (ev.data.size > 0) recordedChunks.push(ev.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'kamcat_trailer.webm'; a.click();
+        stream.getTracks().forEach(t => t.stop());
+        btn.textContent = '● Начать запись';
+        btn.classList.remove('recording');
+      };
+      recorder.start();
+      btn.textContent = '■ Остановить (запись идёт)';
+      btn.classList.add('recording');
+      setTimeout(playTrailer, 1000);
+      setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 62000);
+    } catch (err) { alert('Запись отменена: ' + err.message); }
+  });
+
+  // Пробел — проиграть
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); playTrailer(); }
+  });
+</script>
+</body>
+</html>
